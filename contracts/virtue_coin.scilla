@@ -1,0 +1,195 @@
+scilla_version 0
+
+(***************************************************)
+(*               Associated library                *)
+(***************************************************)
+import ListUtils
+
+library VirtueCoin
+
+let one_msg =
+  fun (msg : Message) =>
+  let nil_msg = Nil {Message} in
+  Cons {Message} msg nil_msg
+
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+
+contract VirtueCoin
+(
+  owner: ByStr20,
+  init_supply: Uint128
+)
+
+(* Mutable fields *)
+
+field total_supply : Uint128 = init_supply
+
+field balances : Map ByStr20 Uint128 =
+  let m = Emp ByStr20 Uint128 in
+  builtin put m owner init_supply
+
+field allowances : Map ByStr20 (Map ByStr20 Uint128) =
+  Emp ByStr20 (Map ByStr20 Uint128)
+
+(* Events *)
+
+event Transfer(from: ByStr20, to: ByStr20, amount: Uint128)
+event Mint(to: ByStr20, amount: Uint128)
+event Burn(from: ByStr20, amount: Uint128)
+
+(***************************************************)
+(*                Helper Functions                 *)
+(***************************************************)
+
+(* Safe subtraction *)
+let sub =
+  fun (a: Uint128) =>
+  fun (b: Uint128) =>
+    builtin sub a b
+
+(* Safe addition *)
+let add =
+  fun (a: Uint128) =>
+  fun (b: Uint128) =>
+    builtin add a b
+
+(***************************************************)
+(*                  Transitions                    *)
+(***************************************************)
+
+(* Transfer tokens *)
+transition Transfer(to: ByStr20, amount: Uint128)
+  from_balance <- balances[_sender];
+  match from_balance with
+  | Some bal =>
+      can_send = builtin ge bal amount;
+      match can_send with
+      | True =>
+          new_from = sub bal amount;
+          balances[_sender] := new_from;
+
+          to_balance <- balances[to];
+          match to_balance with
+          | Some tb =>
+              new_to = add tb amount;
+              balances[to] := new_to
+          | None =>
+              balances[to] := amount
+          end;
+
+          e = { _eventname : "Transfer"; from: _sender; to: to; amount: amount };
+          event e
+      | False =>
+          (* insufficient balance *)
+      end
+  | None =>
+      (* no balance *)
+  end
+end
+
+(* Approve spender *)
+transition Approve(spender: ByStr20, amount: Uint128)
+  owner_allowances <- allowances[_sender];
+  match owner_allowances with
+  | Some m =>
+      new_m = builtin put m spender amount;
+      allowances[_sender] := new_m
+  | None =>
+      m = Emp ByStr20 Uint128;
+      new_m = builtin put m spender amount;
+      allowances[_sender] := new_m
+  end
+end
+
+(* Transfer from approved account *)
+transition TransferFrom(from: ByStr20, to: ByStr20, amount: Uint128)
+  owner_allowances <- allowances[from];
+  match owner_allowances with
+  | Some m =>
+      allowed <- m[_sender];
+      match allowed with
+      | Some a =>
+          can_spend = builtin ge a amount;
+          match can_spend with
+          | True =>
+              from_balance <- balances[from];
+              match from_balance with
+              | Some fb =>
+                  can_send = builtin ge fb amount;
+                  match can_send with
+                  | True =>
+                      new_from = sub fb amount;
+                      balances[from] := new_from;
+
+                      to_balance <- balances[to];
+                      match to_balance with
+                      | Some tb =>
+                          balances[to] := add tb amount
+                      | None =>
+                          balances[to] := amount
+                      end;
+
+                      new_allow = sub a amount;
+                      new_m = builtin put m _sender new_allow;
+                      allowances[from] := new_m;
+
+                      e = { _eventname : "Transfer"; from: from; to: to; amount: amount };
+                      event e
+                  | False => 
+                  end
+              | None =>
+              end
+          | False =>
+          end
+      | None =>
+      end
+  | None =>
+  end
+end
+
+(* Mint new tokens — only owner *)
+transition Mint(to: ByStr20, amount: Uint128)
+  is_owner = builtin eq _sender owner;
+  match is_owner with
+  | True =>
+      current_supply <- total_supply;
+      new_supply = add current_supply amount;
+      total_supply := new_supply;
+
+      to_balance <- balances[to];
+      match to_balance with
+      | Some tb =>
+          balances[to] := add tb amount
+      | None =>
+          balances[to] := amount
+      end;
+
+      e = { _eventname : "Mint"; to: to; amount: amount };
+      event e
+  | False =>
+  end
+end
+
+(* Burn tokens *)
+transition Burn(amount: Uint128)
+  from_balance <- balances[_sender];
+  match from_balance with
+  | Some bal =>
+      can_burn = builtin ge bal amount;
+      match can_burn with
+      | True =>
+          new_bal = sub bal amount;
+          balances[_sender] := new_bal;
+
+          current_supply <- total_supply;
+          total_supply := sub current_supply amount;
+
+          e = { _eventname : "Burn"; from: _sender; amount: amount };
+          event e
+      | False =>
+      end
+  | None =>
+  end
+end
