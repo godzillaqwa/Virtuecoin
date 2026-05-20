@@ -1,0 +1,20 @@
+{
+  "name": "virtuecoin",
+  "version": "1.0.0",
+  "description": "VirtueCoin ERC20 token with Hardhat deployment and verification",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js --network ${NETWORK:-hardhat}",
+    "lint": "",
+    "clean": "rm -rf cache artifacts node_modules",
+    "coverage": ""
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "dotenv": "^16.0.0",
+    "hardhat": "^2.17.0",
+    "@openzeppelin/contracts": "^4.9.0",
+    "chai": "^4.3.7"
+  }
+}
