@@ -18,7 +18,7 @@ deploy:
 
 verify:
 	@echo "Verify on Etherscan: pass ADDRESS and NETWORK. Example: make verify ADDRESS=0x... NETWORK=sepolia"
-	@npx hardhat verify --network $(NETWORK) $(ADDRESS) "Virtue Coin" "VIRT" $(CALLDATA)
+	@npx hardhat verify --network $(NETWORK) $(ADDRESS) "Virtue Coin" "VTC" $(CALLDATA)
 
 clean:
 	rm -rf cache artifacts node_modules
