@@ -1,0 +1,24 @@
+{
+  "asset": {
+    "name": "Virtue Coin",
+    "symbol": "VTC",
+    "decimals": 18,
+    "maxSupplyVTC": "2000000000",
+    "synchronicitiesPerVTC": 20
+  },
+  "treasury": {
+    "name": "Wylie National Bank Treasury",
+    "vtcContractAddress": "",
+    "treasuryContractAddress": "",
+    "externalTronVault": ""
+  },
+  "game": {
+    "name": "Frosted Fleet",
+    "fleetContractAddress": ""
+  },
+  "economics": {
+    "referenceVTCUSD": 20,
+    "referenceOnly": true,
+    "usdRedemptionGuaranteed": false
+  }
+}
