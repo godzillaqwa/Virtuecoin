@@ -1,18 +1,14 @@
 {
   "name": "virtuecoin",
-  "version": "1.1.0",
-  "description": "VirtueCoin VTC ERC-20, Wylie National Bank treasury, Frosted Fleet, and read-only API",
+  "version": "1.0.0",
+  "description": "VirtueCoin ERC20 token with Hardhat deployment and verification",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.js --network ${NETWORK:-hardhat}",
-    "api": "node api/server.js",
     "lint": "",
     "clean": "rm -rf cache artifacts node_modules",
     "coverage": ""
-  },
-  "dependencies": {
-    "express": "^4.21.2"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
