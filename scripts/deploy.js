@@ -2,7 +2,8 @@ const hre = require("hardhat");
 require("dotenv").config();
 
 async function main() {
-  const owner = process.env.OWNER_ADDRESS || "0xe04cA6224d28A09aeDDE64EaF7A4392CD0e775F5";
+  const [deployer] = await hre.ethers.getSigners();
+  const owner = process.env.OWNER_ADDRESS || deployer.address;
   const initSupplyStr = process.env.INIT_SUPPLY || "2000000000";
   const decimals = 18;
   const maxSupply = hre.ethers.utils.parseUnits("2000000000", decimals);
@@ -15,6 +16,7 @@ async function main() {
   console.log("Deploying VirtueToken with:");
   console.log("  name: Virtue Coin");
   console.log("  symbol: VTC");
+  console.log("  deployer:", deployer.address);
   console.log("  owner:", owner);
   console.log("  initialSupply:", initialSupply.toString());
   console.log("  maxSupply:", maxSupply.toString());
