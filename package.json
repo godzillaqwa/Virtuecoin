@@ -8,7 +8,8 @@
     "deploy": "hardhat run scripts/deploy.js --network ${NETWORK:-hardhat}",
     "lint": "",
     "clean": "rm -rf cache artifacts node_modules",
-    "coverage": ""
+    "coverage": "",
+    "deploy:all": "hardhat run scripts/deploy-all.js --network ${NETWORK:-hardhat}"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
